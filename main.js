@@ -29,53 +29,113 @@ function operate(operator, a, b){
             return add(a, b)
         case "-":
             return subtract(a, b)
-        case "*":
+        case "×":
             return multiply(a, b)
-        case "/":
+        case "÷":
             return divide(a, b)
         default:
-            console.log("Please enter a valid math operator!")
+            // console.log("Please enter a valid math operator!")
+            return
     }
 }
 
-// DEFAULT
-let displayValue = ""
-let a = 0
-let b = 0
-let operator
 
-const numberBtns = document.querySelectorAll(".numberBtn")
+const numberBtns = document.querySelectorAll(".number")
+const operatorBtns = document.querySelectorAll(".operator")
+const equalsBtn = document.querySelector("#equals")
+const clearBtn = document.querySelector("#clear")
+const delBtn = document.querySelector("#delete")
+const signChangeBtn = document.querySelector("#signChange")
+const decimalBtn = document.querySelector("#decimal")
+const currentOperation = document.querySelector("#currentOperation")
+// const lastOperation = document.querySelector("#lastOperation")
+
 Array.from(numberBtns).forEach(number => number.addEventListener("click", updateDisplay))
-
-const operatorBtns = document.querySelectorAll(".operatorBtn")
 Array.from(operatorBtns).forEach(operator => operator.addEventListener("click", storeFirstNum))
+equalsBtn.addEventListener("click", evaluate)
 
-const equalsBtn = document.querySelector("#equalsBtn")
-equalsBtn.addEventListener("click", storeSecondNum)
 
-const mainDisplay = document.querySelector("#mainDisplay")
-
-const clearBtn = document.querySelector("#clearBtn")
-clearBtn.addEventListener("click", () => mainDisplay.innerText = "")
-
-let pushedOperator = false
+// DEFAULT
+let a = undefined
+let b = undefined
+let c = undefined
+let operator = ""
+let prevKey = ""
 
 // update display function
 function updateDisplay(){
-    if (pushedOperator) {
-        mainDisplay.innerText = ""
-        pushedOperator = false
+    if (currentOperation.innerText === "0" || prevKey === "operator" || prevKey === "equals"){
+        currentOperation.innerText = this.innerText
+    } else if ((currentOperation.innerText.length <= 10)){
+        currentOperation.innerText += this.innerText
     }
-    mainDisplay.innerText += this.innerText
+    prevKey = "number"
 }
 
 function storeFirstNum(){
-    a = Number(mainDisplay.innerText)
+    // if (prevKey === "equals"){
+    //     lastOperation.innerText = ""
+    // }
+    if (a && !b && prevKey !== "operator"){
+        c = Number(currentOperation.innerText)
+        currentOperation.innerText = Math.round(operate(operator, a, c) * 10000) / 10000
+    }
+    a = Number(currentOperation.innerText)
     operator = this.innerText
-    pushedOperator = true
+    // lastOperation.innerText += `${currentOperation.innerText}${this.innerText}`
+    // this.classList.add("active")
+    prevKey = "operator"
 }
 
-function storeSecondNum(){
-    b = Number(mainDisplay.innerText)
-    mainDisplay.innerText = operate(operator, a, b)
+function evaluate(){
+    if (prevKey === "equals"){
+        a = Number(currentOperation.innerText)
+    } else{
+        b = Number(currentOperation.innerText)
+    }
+    // lastOperation.innerText += `${currentOperation.innerText}=`
+    currentOperation.innerText = Math.round(operate(operator, a, b) * 10000) / 10000
+    prevKey = "equals"
 }
+
+clearBtn.addEventListener("click", () => {
+    currentOperation.innerText = "0"
+    // lastOperation.innerText = ""
+    a = undefined
+    b = undefined
+    operator = ""
+    prevKey = ""
+})
+
+delBtn.addEventListener("click", () => {
+    if (prevKey !== "equals"){
+        if (currentOperation.innerText.slice(0, -1).length === 0){
+            currentOperation.innerText = "0"
+        } else{
+            currentOperation.innerText = currentOperation.innerText.slice(0, -1)
+        }
+    }
+})
+
+signChangeBtn.addEventListener("click", () => {
+    if (currentOperation.innerText === "0" || prevKey === "operator"){
+        currentOperation.innerText = "-"
+    } else if (currentOperation.innerText[0] === "-"){
+        currentOperation.innerText = currentOperation.innerText.slice(1)
+    } else{
+        currentOperation.innerText = "-" + currentOperation.innerText
+    }
+    prevKey = "signChange"
+})
+
+decimalBtn.addEventListener("click", () => {
+    if (prevKey === "equals" || prevKey === "operator"){
+        currentOperation.innerText = "0."
+    } else if (!currentOperation.innerText.includes(".")){
+        currentOperation.innerText += "."
+    }    
+    prevKey = "decimal"
+})
+
+// limit result of operate to string length <= 10
+// add keydown event listeners for keyboard
