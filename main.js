@@ -45,10 +45,40 @@ const operatorBtns = document.querySelectorAll(".operator")
 const equalsBtn = document.querySelector("#equals")
 const clearBtn = document.querySelector("#clear")
 const delBtn = document.querySelector("#delete")
-const signChangeBtn = document.querySelector("#signChange")
+const changeSignBtn = document.querySelector("#changeSign")
 const decimalBtn = document.querySelector("#decimal")
 const currentOperation = document.querySelector("#currentOperation")
 // const lastOperation = document.querySelector("#lastOperation")
+
+window.addEventListener("keydown", (e) => {
+    if (e.key >= "0" && e.key <= "9"){
+        appendNumber(e.key)
+    } 
+    if (e.key === "+" || e.key === "-" || e.key === "*" || e.key === "/"){
+        // fix this, maybe incorporate a save operator function?
+        console.log(e.key)
+    }
+    if (e.key === "."){
+        addDecimal()
+    }
+    if (e.key === "ArrowDown" || e.key === "ArrowUp"){
+        changeSign()
+    }
+    if (e.key === "Enter"){
+        evaluate()
+    }
+    if (e.key === "Backspace"){
+        del()
+    }
+    if (e.key === "Escape"){
+        clear()
+    }
+})
+
+function appendNumber(n){
+    currentOperation.innerText += n
+    prevKey = "number"
+}
 
 Array.from(numberBtns).forEach(number => number.addEventListener("click", updateDisplay))
 Array.from(operatorBtns).forEach(operator => operator.addEventListener("click", storeFirstNum))
@@ -98,16 +128,18 @@ function evaluate(){
     prevKey = "equals"
 }
 
-clearBtn.addEventListener("click", () => {
+clearBtn.addEventListener("click", clear)
+function clear(){
     currentOperation.innerText = "0"
     // lastOperation.innerText = ""
     a = undefined
     b = undefined
     operator = ""
     prevKey = ""
-})
+}
 
-delBtn.addEventListener("click", () => {
+delBtn.addEventListener("click", del)
+function del(){
     if (prevKey !== "equals"){
         if (currentOperation.innerText.slice(0, -1).length === 0){
             currentOperation.innerText = "0"
@@ -115,9 +147,10 @@ delBtn.addEventListener("click", () => {
             currentOperation.innerText = currentOperation.innerText.slice(0, -1)
         }
     }
-})
+}
 
-signChangeBtn.addEventListener("click", () => {
+changeSignBtn.addEventListener("click", changeSign)
+function changeSign(){
     if (currentOperation.innerText === "0" || prevKey === "operator"){
         currentOperation.innerText = "-"
     } else if (currentOperation.innerText[0] === "-"){
@@ -125,17 +158,19 @@ signChangeBtn.addEventListener("click", () => {
     } else{
         currentOperation.innerText = "-" + currentOperation.innerText
     }
-    prevKey = "signChange"
-})
+    prevKey = "changeSign"
+}
 
-decimalBtn.addEventListener("click", () => {
+decimalBtn.addEventListener("click", addDecimal)
+function addDecimal(){
     if (prevKey === "equals" || prevKey === "operator"){
         currentOperation.innerText = "0."
     } else if (!currentOperation.innerText.includes(".")){
         currentOperation.innerText += "."
     }    
     prevKey = "decimal"
-})
+}
+
 
 // limit result of operate to string length <= 10
-// add keydown event listeners for keyboard
+// chain calcs still not working correctly
